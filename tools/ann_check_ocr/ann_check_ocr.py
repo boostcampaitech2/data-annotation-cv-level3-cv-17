@@ -4,11 +4,14 @@ import cv2
 import os
 import json
 import numpy as np
+import my_path
 
-img_path = 'ICDAR17_Korean/images/'             #
-json_path = 'ICDAR17_Korean/ufo/train.json'     # 자신의 경로로 바꿔주세요!
+
+img_path = my_path.img_path                        #
+json_path = my_path.json_path                      # my_path.py 파일에서 자신의 경로로 바꿔주세요!
+
 # annotation data 읽기
-with open(json_path, 'r') as f:
+with open(json_path, 'r', encoding='UTF-8') as f:
     json_data = json.load(f)
 img_list = list(json_data['images'].keys())
 # 이상한 이미지 목록 있다면 불러오기
@@ -21,10 +24,12 @@ if os.path.exists('./StrangeImgList.txt'):
             print('exist_datas', read_data) # 기존 데이터 출력
             Strange_img_set = set(map(int, read_data))\
 
-end_idx = 535
 
-# 필요에 따른 수정 부분
+
+####### 필요에 따른 수정 부분
 current_idx = 0 # 시작 인덱스
+end_idx = 275 # 끝 인덱스
+
 img_size = (800, 800) # 편의에 맞게 이미지 크기 조절
 img_save = True # 이미지 저장 여부
 
@@ -67,8 +72,8 @@ while True:
         print('current_idx', current_idx)
     elif ret == 83 or ret == 115: # 'S' or 's' 입력한 경우, Save
         if img_save: # 이미지 저장
-            if not os.path.exists("./StrangeImage/{}.jpg".format(current_img)):
-                cv2.imwrite("./StrangeImage/{}.jpg".format(current_img), img)
+            if not os.path.exists("./StrangeImage/{}".format(current_img)):
+                cv2.imwrite("./StrangeImage/{}".format(current_img), img)
         Strange_img_set.add(current_img)
         save_txt(Strange_img_set) # 텍스트 파일 업데이트
         print('add', current_img)
@@ -80,7 +85,7 @@ while True:
         except:
             pass
         if img_save: # 이미지 제거
-            if os.path.exists("./StrangeImage/{}.jpg".format(current_img)):
-                os.remove("./StrangeImage/{}.jpg".format(current_img))
+            if os.path.exists("./StrangeImage/{}".format(current_img)):
+                os.remove("./StrangeImage/{}".format(current_img))
     elif ret == 27: # 'ESC' 입력시 종료
         break
