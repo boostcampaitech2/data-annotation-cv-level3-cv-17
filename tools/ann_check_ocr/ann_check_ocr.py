@@ -51,7 +51,7 @@ def save_txt(img_set):
 
 while True:
     current_img = img_list[current_idx]
-    img = cv2.imread(img_path+current_img)
+    img = cv2.imread(os.path.join(img_path, current_img))
     words = json_data['images'][current_img]['words']
 
     # 글자 도형 그리기
