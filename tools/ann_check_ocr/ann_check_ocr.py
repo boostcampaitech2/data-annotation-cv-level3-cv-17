@@ -8,7 +8,7 @@ import numpy as np
 img_path = 'ICDAR17_Korean/images/'             #
 json_path = 'ICDAR17_Korean/ufo/train.json'     # 자신의 경로로 바꿔주세요!
 # annotation data 읽기
-with open(json_path, 'r') as f:
+with open(json_path, 'r', encoding='UTF-8') as f:
     json_data = json.load(f)
 img_list = list(json_data['images'].keys())
 # 이상한 이미지 목록 있다면 불러오기
