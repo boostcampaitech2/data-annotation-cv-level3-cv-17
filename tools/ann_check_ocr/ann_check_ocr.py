@@ -22,7 +22,7 @@ if os.path.exists('./StrangeImgList.txt'):
         if len(read_data) >= 1: # 저장된 요소가 있다면
             read_data = read_data.split(',')
             print('exist_datas', read_data) # 기존 데이터 출력
-            Strange_img_set = set(map(int, read_data))\
+            Strange_img_set = set(read_data)\
 
 
 
@@ -48,7 +48,6 @@ def save_txt(img_set):
     with open('StrangeImgList.txt', 'w') as f:
         f.write(write_elements)
 
-color = (100,255,0)
 
 while True:
     current_img = img_list[current_idx]
@@ -57,6 +56,10 @@ while True:
 
     # 글자 도형 그리기
     for word in words.values():
+        if word['illegibility']:
+            color = (0,0,255)
+        else:
+            color = (100,255,0)
         points = np.array(word['points'], dtype=np.int32)
         points = points.reshape((-1,1,2))
         img = cv2.polylines(img, [points], True, color, 2)
