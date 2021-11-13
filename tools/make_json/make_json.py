@@ -23,9 +23,15 @@ for fname in read_data:
     except:
         pass
 print(len(json_data['images']))
-
+for fname in json_data['images']:
+    words = json_data['images'][fname]['words']
+    for k, v in tuple(words.items()):
+        if len(v['points'])!=4:
+            print(v['points'])
+            json_data['images'][fname]['words'].pop(k)
+print(len(json_data['images']))
 json_data['images'].update(json_data2['images'])
 print(len(json_data['images']))
 
-with open('new_ann.json', 'w', encoding='UTF-8') as f:
-    json.dump(json_data,f,indent=2)
+# with open('new_ann2.json', 'w', encoding='UTF-8') as f:
+#     json.dump(json_data,f,indent=2)
