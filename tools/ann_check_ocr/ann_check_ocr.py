@@ -25,7 +25,6 @@ if os.path.exists('./StrangeImgList.txt'):
             Strange_img_set = set(read_data)\
 
 
-
 ####### 필요에 따른 수정 부분
 current_idx = 0 # 시작 인덱스
 end_idx = 275 # 끝 인덱스
