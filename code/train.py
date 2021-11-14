@@ -48,6 +48,7 @@ def parse_args():
 
     parser.add_argument('--seed', type=int, default=2222, help='random seed (default: 2222)')
     parser.add_argument('--name', type=str, default="helloworld")
+    parser.add_argument('--annotation', type=str, default="annotation", help='check file path (default: annotation')
 
     args = parser.parse_args()
 
@@ -58,12 +59,12 @@ def parse_args():
 
 
 def do_training(data_dir, model_dir, device, image_size, input_size, num_workers, batch_size,
-                learning_rate, max_epoch, save_interval, seed, name):
+                learning_rate, max_epoch, save_interval, seed, name, annotation):
 
     seed_everything(seed)
     wandb.init(project="text-detection", entity="visual_cv17", name=name)
 
-    dataset = SceneTextDataset(data_dir, split='annotation_new', image_size=image_size, crop_size=input_size)
+    dataset = SceneTextDataset(data_dir, split=annotation, image_size=image_size, crop_size=input_size)
     dataset = EASTDataset(dataset)
     num_batches = math.ceil(len(dataset) / batch_size)
     train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
