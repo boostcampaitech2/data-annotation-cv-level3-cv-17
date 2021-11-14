@@ -12,3 +12,4 @@ trained_models
 StrangeImage/
 dataset_revised/
 __pycache__/
+wandb/

@@ -4,6 +4,7 @@ import time
 import math
 from datetime import timedelta
 from argparse import ArgumentParser
+import random
 
 import torch
 from torch import cuda
@@ -11,17 +12,27 @@ from torch.utils.data import DataLoader
 from torch.optim import lr_scheduler
 from tqdm import tqdm
 
+import wandb
+
 from east_dataset import EASTDataset
 from dataset import SceneTextDataset
 from model import EAST
 
+def seed_everything(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    # torch.cuda.manual_seed_all(seed)  # if use multi-GPU
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    # np.random.seed(seed)
+    random.seed(seed)
 
 def parse_args():
     parser = ArgumentParser()
 
     # Conventional args
     parser.add_argument('--data_dir', type=str,
-                        default=os.environ.get('SM_CHANNEL_TRAIN', '../input/data/ICDAR17_Korean'))
+                        default=os.environ.get('SM_CHANNEL_TRAIN', '../../input/data/annotation/'))
     parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_MODEL_DIR',
                                                                         'trained_models'))
 
@@ -35,6 +46,9 @@ def parse_args():
     parser.add_argument('--max_epoch', type=int, default=200)
     parser.add_argument('--save_interval', type=int, default=5)
 
+    parser.add_argument('--seed', type=int, default=2222, help='random seed (default: 2222)')
+    parser.add_argument('--name', type=str, default="helloworld")
+
     args = parser.parse_args()
 
     if args.input_size % 32 != 0:
@@ -44,8 +58,12 @@ def parse_args():
 
 
 def do_training(data_dir, model_dir, device, image_size, input_size, num_workers, batch_size,
-                learning_rate, max_epoch, save_interval):
-    dataset = SceneTextDataset(data_dir, split='train', image_size=image_size, crop_size=input_size)
+                learning_rate, max_epoch, save_interval, seed, name):
+
+    seed_everything(seed)
+    wandb.init(project="text-detection", entity="visual_cv17", name=name)
+
+    dataset = SceneTextDataset(data_dir, split='annotation_new', image_size=image_size, crop_size=input_size)
     dataset = EASTDataset(dataset)
     num_batches = math.ceil(len(dataset) / batch_size)
     train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
@@ -56,6 +74,7 @@ def do_training(data_dir, model_dir, device, image_size, input_size, num_workers
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[max_epoch // 2], gamma=0.1)
 
+    wandb.watch(model) ## custom
     model.train()
     for epoch in range(max_epoch):
         epoch_loss, epoch_start = 0, time.time()
@@ -76,6 +95,16 @@ def do_training(data_dir, model_dir, device, image_size, input_size, num_workers
                     'Cls loss': extra_info['cls_loss'], 'Angle loss': extra_info['angle_loss'],
                     'IoU loss': extra_info['iou_loss']
                 }
+
+                ## custom
+                wandb.log({
+                    "train/loss" : loss_val,
+                    "train/Cls_loss": extra_info['cls_loss'],
+                    "train/Angle_loss" : extra_info['angle_loss'],
+                    "train/IoU_loss" : extra_info['iou_loss'],
+                    })
+                ##
+
                 pbar.set_postfix(val_dict)
 
         scheduler.step()
