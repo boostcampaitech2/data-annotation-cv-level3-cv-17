@@ -220,7 +220,9 @@ def crop_img(img, vertices, labels, length):
         cnt += 1
         start_w = int(np.random.rand() * remain_w)
         start_h = int(np.random.rand() * remain_h)
-        flag = is_cross_text([start_w, start_h], length, new_vertices[labels==1,:])
+        
+        flag = is_cross_text([start_w, start_h], length, new_vertices)
+
     box = (start_w, start_h, start_w + length, start_h + length)
     region = img.crop(box)
     if new_vertices.size == 0:
@@ -312,7 +314,7 @@ def generate_roi_mask(image, vertices, labels):
     ignored_polys = []
     for vertice, label in zip(vertices, labels):
         if label == 0:
-            ignored_polys.append(np.around(vertice.reshape((4, 2))).astype(np.int32))
+            ignored_polys.append(np.around(vertice.reshape((-1, 2))).astype(np.int32))
     cv2.fillPoly(mask, ignored_polys, 0)
     return mask
 
@@ -341,7 +343,8 @@ class SceneTextDataset(Dataset):
 
         self.anno = anno
         self.image_fnames = sorted(anno['images'].keys())
-        self.image_dir = osp.join(root_dir, 'images')
+        # self.image_dir = osp.join(root_dir, 'images')
+        self.image_dir = osp.join(root_dir, 'images_without_no_ann')
 
         self.image_size, self.crop_size = image_size, crop_size
         self.color_jitter, self.normalize = color_jitter, normalize
@@ -354,9 +357,15 @@ class SceneTextDataset(Dataset):
         image_fpath = osp.join(self.image_dir, image_fname)
 
         vertices, labels = [], []
+        ille_vertices, ille_labels = [], []
         for word_info in self.anno['images'][image_fname]['words'].values():
-            vertices.append(np.array(word_info['points']).flatten())
-            labels.append(int(not word_info['illegibility']))
+            if len(word_info['points']) == 4:
+                vertices.append(np.array(word_info['points']).flatten())
+                labels.append(int(not word_info['illegibility']))
+            elif len(word_info['points']) > 4:
+                ille_vertices.append(np.array(word_info['points']).flatten())
+                ille_labels.append(int(not word_info['illegibility']))
+                
         vertices, labels = np.array(vertices, dtype=np.float32), np.array(labels, dtype=np.int64)
 
         vertices, labels = filter_vertices(vertices, labels, ignore_under=10, drop_under=1)
