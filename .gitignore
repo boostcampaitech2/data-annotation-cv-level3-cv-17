@@ -1,0 +1,42 @@
+# 가상환경
+.venv
+
+# 파일경로
+my_path.py
+
+## trained models
+pths
+trained_models
+
+
+StrangeImage/
+dataset_revised/
+__pycache__/
+wandb/
+
+# aistages서버 파일
+__MACOSX/
+.cache/
+.config/
+.ipython
+.jupyter/
+.local/
+.nv/
+.vscode-server/
+input/
+.bash_history
+.netrc
+.profile
+.wget-hsts
+
+# 파일경로
+code/my_path.py
+
+## trained models
+code/pths/
+code/trained_models/
+
+code/.ipynb_checkpoints/
+code/StrangeImage/
+code/__pycache__/
+code/wandb/
