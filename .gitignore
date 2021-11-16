@@ -12,7 +12,6 @@ trained_models
 StrangeImage/
 dataset_revised/
 __pycache__/
-<<<<<<< HEAD
 wandb/
 
 # aistages서버 파일
@@ -44,6 +43,3 @@ code/.ipynb_checkpoints/
 code/StrangeImage/
 code/__pycache__/
 code/wandb/
-=======
-wandb/
->>>>>>> 57290a9a93b6588266b32ac8cb052e13d21fda01
