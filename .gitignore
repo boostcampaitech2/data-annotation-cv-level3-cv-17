@@ -29,6 +29,9 @@ input/
 .profile
 .wget-hsts
 
+# git 설정파일
+.gitconfig
+
 # 파일경로
 code/my_path.py
 
