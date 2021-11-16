@@ -333,6 +333,17 @@ def filter_vertices(vertices, labels, ignore_under=0, drop_under=0):
     return new_vertices, new_labels
 
 
+def parse_vertices(_vertices):
+    n_pts = len(_vertices)
+    assert n_pts % 2 == 0, 'Wrong points! It has odd vertices.'
+    _vertices = np.array(_vertices)
+    return [
+        np.vstack(
+            [_vertices[idx:idx + 2],
+            _vertices[n_pts - 2 - idx:n_pts - idx]]).flatten()
+        for idx in range(int(n_pts / 2) - 1)
+    ]
+
 class SceneTextDataset(Dataset):
     def __init__(self, root_dir, split='annotation', image_size=1024, crop_size=512, color_jitter=True,
                  normalize=True):
@@ -355,8 +366,12 @@ class SceneTextDataset(Dataset):
 
         vertices, labels = [], []
         for word_info in self.anno['images'][image_fname]['words'].values():
-            vertices.append(np.array(word_info['points']).flatten())
-            labels.append(int(not word_info['illegibility']))
+            # vertices.append(np.array(word_info['points']).flatten())
+            # labels.append(int(not word_info['illegibility']))
+            parsed_vertices = parse_vertices(word_info['points'])
+            vertices.extend(parsed_vertices)
+            labels.extend([int(not word_info['illegibility'])]*len(parsed_vertices))
+
         vertices, labels = np.array(vertices, dtype=np.float32), np.array(labels, dtype=np.int64)
 
         vertices, labels = filter_vertices(vertices, labels, ignore_under=10, drop_under=1)

@@ -32,7 +32,7 @@ def parse_args():
 
     # Conventional args
     parser.add_argument('--data_dir', type=str,
-                        default=os.environ.get('SM_CHANNEL_TRAIN', '../../input/data/annotation/'))
+                        default=os.environ.get('SM_CHANNEL_TRAIN', '../../input/data/dataset/'))
     parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_MODEL_DIR',
                                                                         'trained_models'))
 
@@ -48,7 +48,8 @@ def parse_args():
 
     parser.add_argument('--seed', type=int, default=2222, help='random seed (default: 2222)')
     parser.add_argument('--name', type=str, default="helloworld")
-    parser.add_argument('--annotation', type=str, default="annotation", help='check file path (default: annotation')
+    parser.add_argument('--annotation', type=str, default="train", help='check file path (default: annotation')
+    parser.add_argument('--project', type=str, default="text-detection", help='wandb project')
 
     args = parser.parse_args()
 
