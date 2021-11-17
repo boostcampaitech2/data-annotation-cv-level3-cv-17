@@ -77,8 +77,11 @@ def do_training(data_dir, model_dir, device, image_size, input_size, num_workers
 
     wandb.watch(model) ## custom
     model.train()
+
+    best_loss = 9999
     for epoch in range(max_epoch):
         epoch_loss, epoch_start = 0, time.time()
+        cls_loss, angle_loss, iou_loss = 0, 0, 0
         with tqdm(total=num_batches) as pbar:
             for img, gt_score_map, gt_geo_map, roi_mask in train_loader:
                 pbar.set_description('[Epoch {}]'.format(epoch + 1))
@@ -90,6 +93,9 @@ def do_training(data_dir, model_dir, device, image_size, input_size, num_workers
 
                 loss_val = loss.item()
                 epoch_loss += loss_val
+                cls_loss += extra_info['cls_loss']
+                angle_loss += extra_info['angle_loss']
+                iou_loss += extra_info['iou_loss']
 
                 pbar.update(1)
                 val_dict = {
@@ -97,21 +103,19 @@ def do_training(data_dir, model_dir, device, image_size, input_size, num_workers
                     'IoU loss': extra_info['iou_loss']
                 }
 
-                ## custom
-                wandb.log({
-                    "train/loss" : loss_val,
-                    "train/Cls_loss": extra_info['cls_loss'],
-                    "train/Angle_loss" : extra_info['angle_loss'],
-                    "train/IoU_loss" : extra_info['iou_loss'],
-                    })
-                ##
-
                 pbar.set_postfix(val_dict)
 
         scheduler.step()
 
+        mean_loss = epoch_loss / num_batches
         print('Mean loss: {:.4f} | Elapsed time: {}'.format(
-            epoch_loss / num_batches, timedelta(seconds=time.time() - epoch_start)))
+            mean_loss, timedelta(seconds=time.time() - epoch_start)))
+
+        if best_loss > mean_loss:
+            if not osp.exists(model_dir):
+                os.makedirs(model_dir)
+            ckpt_fpath = osp.join(model_dir, 'best_model.pth')
+            torch.save(model.state_dict(), ckpt_fpath)
 
         if (epoch + 1) % save_interval == 0:
             if not osp.exists(model_dir):
@@ -119,6 +123,15 @@ def do_training(data_dir, model_dir, device, image_size, input_size, num_workers
 
             ckpt_fpath = osp.join(model_dir, 'latest.pth')
             torch.save(model.state_dict(), ckpt_fpath)
+
+        ## custom
+        wandb.log({
+            "train/Mean_loss" : mean_loss,
+            "train/Cls_loss": cls_loss / num_batches,
+            "train/Angle_loss" : angle_loss / num_batches,
+            "train/IoU_loss" : iou_loss / num_batches,
+            })
+        ##
 
 
 def main(args):
