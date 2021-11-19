@@ -1,5 +1,17 @@
 # 글자 검출 대회
 
+
+## Tools
+
+### **데이터 검수 툴**
+
+데이터 검수 툴에 대한 내용
+
+### **json 만드는 툴**
+
+새로운 json 만드는 툴에 대한 내용
+
+---
 ## Members
 
 |   <div align="center">김주영 </div>	|  <div align="center">오현세 </div> 	|  <div align="center">채유리 </div> 	|  <div align="center">배상우 </div> 	|  <div align="center">최세화 </div>  | <div align="center">송정현 </div> |
